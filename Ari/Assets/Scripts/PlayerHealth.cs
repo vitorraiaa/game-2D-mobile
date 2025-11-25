@@ -75,21 +75,27 @@ public class PlayerHealth : MonoBehaviour
         if (dead) return;
         dead = true;
 
+        // salva nível atual
+        DeathData.lastLevelIndex = SceneManager.GetActiveScene().buildIndex;
+
         SfxManager.Instance?.StopMusic(musicFadeOnDeath);
         SfxManager.Instance?.PlayGameOver();
 
         if (anim) anim.SetTrigger("Dead");
 
-        var move = GetComponent<PlayerMovement2D>(); if (move) move.enabled = false;
-        foreach (var c in GetComponentsInChildren<Collider2D>()) c.enabled = false;
-        var rb = GetComponent<Rigidbody2D>(); if (rb) rb.simulated = false;
+        var move = GetComponent<PlayerMovement2D>(); 
+        if (move) move.enabled = false;
 
-        // Remova ou comente esta linha:
-        // if (destroyOnDeath)
-        //     StartCoroutine(WaitAndDisappear());
+        foreach (var c in GetComponentsInChildren<Collider2D>())
+            c.enabled = false;
+
+        var rb = GetComponent<Rigidbody2D>(); 
+        if (rb) rb.simulated = false;
 
         StartCoroutine(LoadGameOverAfterDelay());
     }
+
+
 
     IEnumerator WaitAndDisappear()
     {
@@ -148,17 +154,25 @@ public class PlayerHealth : MonoBehaviour
         if (anim) anim.SetTrigger("Heal");
     }
 
-    IEnumerator LoadGameOverAfterDelay()
+    IEnumerator ReloadCurrentSceneAfterDelay()
     {
         yield return new WaitForSeconds(gameOverDelay);
 
-        if (!string.IsNullOrEmpty(gameOverSceneName))
-        {
-            SceneManager.LoadScene(gameOverSceneName);
-        }
-        else
-        {
-            Debug.LogWarning("[PlayerHealth] gameOverSceneName não definido!");
-        }
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(sceneIndex);
     }
+    IEnumerator LoadGameOverAfterDelay()
+        {
+            yield return new WaitForSeconds(gameOverDelay);
+
+            if (!string.IsNullOrEmpty(gameOverSceneName))
+            {
+                SceneManager.LoadScene(gameOverSceneName);
+            }
+            else
+            {
+                Debug.LogWarning("[PlayerHealth] gameOverSceneName não definido!");
+            }
+        }
+
 }
