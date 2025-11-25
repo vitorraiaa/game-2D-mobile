@@ -11,15 +11,15 @@ public class PlayerShoot2D : MonoBehaviour
 
     [Header("Main Shot Cooldown")]
     [Tooltip("Tiros por segundo segurando o botão. Valores menores = menos spam.")]
-    public float fireRate = 3f;          // antes 6f, agora mais cadenciado
-    public float spawnMargin = 0.08f;    // distância extra além do collider do player
+    public float fireRate = 3f;
+    public float spawnMargin = 0.08f;
     public float recoilKick = 0f;
 
     [Header("Extra Attack")]
-    public bool hasExtraAttackPower = false;   // ligado pelo pickup
-    public GameObject extraBulletPrefab;       // prefab especial
+    public bool hasExtraAttackPower = false;
+    public GameObject extraBulletPrefab;
     public float extraBulletSpeed = 14f;
-    [Tooltip("Cooldown em segundos entre usos do ataque extra (tecla E).")]
+    [Tooltip("Cooldown em segundos entre usos do ataque extra.")]
     public float extraAttackCooldown = 2.5f;
 
     [Header("Animator (opcional)")]
@@ -43,20 +43,21 @@ public class PlayerShoot2D : MonoBehaviour
 
     void Update()
     {
-        // avança timers
+        // timers
         if (fireCooldownTimer > 0f)  fireCooldownTimer  -= Time.deltaTime;
         if (extraCooldownTimer > 0f) extraCooldownTimer -= Time.deltaTime;
 
-        // tiro normal (segurando botão / mouse)
-        bool fireMain = Input.GetButton("Fire1") || Input.GetMouseButton(0);
+        // ===== ATAQUE PRINCIPAL =====
+        // No desktop: mouse/Fire1; no mobile: botão Attack (tap) — também dá pra segurar usando AttackHeld
+        bool fireMain = InputRouter.AttackHeld() || InputRouter.AttackTap();
         if (fireMain && fireCooldownTimer <= 0f)
         {
             ShootOnce();
             fireCooldownTimer = 1f / Mathf.Max(0.01f, fireRate);
         }
 
-        // ataque extra (E) com cooldown próprio
-        if (hasExtraAttackPower && Input.GetKeyDown(KeyCode.E) && extraCooldownTimer <= 0f)
+        // ===== ESPECIAL =====
+        if (hasExtraAttackPower && InputRouter.SpecialTap() && extraCooldownTimer <= 0f)
         {
             ShootExtra();
             extraCooldownTimer = extraAttackCooldown;
@@ -71,7 +72,6 @@ public class PlayerShoot2D : MonoBehaviour
             return;
         }
 
-        // SFX de tiro
         if (SfxManager.Instance) SfxManager.Instance.PlayShoot();
 
         SpawnBullet(bulletPrefab, bulletSpeed);
@@ -88,7 +88,6 @@ public class PlayerShoot2D : MonoBehaviour
             return;
         }
 
-        // SFX de tiro (também no extra, se quiser diferenciar, crie PlayShootExtra)
         if (SfxManager.Instance) SfxManager.Instance.PlayShoot();
 
         SpawnBullet(extraBulletPrefab, extraBulletSpeed);
@@ -123,8 +122,7 @@ public class PlayerShoot2D : MonoBehaviour
         var bullet = go.GetComponent<Bullet2D>();
         if (bullet)
         {
-            // garante que só acerta inimigos/boss
-            bullet.hitMask = LayerMask.GetMask("Enemy");
+            bullet.hitMask = LayerMask.GetMask("Enemy"); // boss/inimigos
             bullet.Launch(shotDir, speed);
         }
 
