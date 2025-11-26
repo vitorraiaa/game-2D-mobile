@@ -253,7 +253,7 @@ MonoBehaviour:
   runSpeed: 4.5
   aceleracaoNoChao: 10
   aceleracaoNoAr: 1
-  forcaPulo: 7
+  forcaPulo: 15
   coyoteTime: 0.01
   jumpBuffer: 0.01
   gravidadeDescida: 2
