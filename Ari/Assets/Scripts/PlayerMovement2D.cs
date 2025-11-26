@@ -15,6 +15,16 @@ public class PlayerMovement2D : MonoBehaviour
     public float aceleracaoNoChao = 60f;
     public float aceleracaoNoAr   = 40f;
 
+    [Header("Auto-Run (segurar para correr)")]
+    public bool  autoRunEnabled   = true;
+    public float runHoldSeconds   = 0.8f;  // tempo segurando até virar corrida
+    public float runAxisThreshold = 0.9f;  // quão “cheio” precisa estar o eixo
+    public float runResetGrace    = 0.15f; // tolerância após soltar antes de resetar
+    float runHoldTimer = 0f;
+    int   lastDir = 0;                 // -1 esquerda, +1 direita, 0 parado
+    bool  isAutoRunning = false;
+    float runReleaseTimer = 0f;
+
     [Header("Pulo")]
     public float forcaPulo = 10.5f;
     public float coyoteTime   = 0.12f;
@@ -158,7 +168,55 @@ public class PlayerMovement2D : MonoBehaviour
 
         if (inputX != 0) sr.flipX = inputX < 0;
 
-        // Buffer de pulo (equivalente a apertar espaço/Jump)
+        // ----- AUTO-RUN -----
+        if (autoRunEnabled)
+        {
+            int dir = Mathf.Abs(inputX) >= runAxisThreshold ? (inputX > 0 ? 1 : -1) : 0;
+
+            if (dir == 0)
+            {
+                if (runReleaseTimer <= 0f) runReleaseTimer = runResetGrace;
+                else
+                {
+                    runReleaseTimer -= Time.deltaTime;
+                    if (runReleaseTimer <= 0f)
+                    {
+                        runHoldTimer = 0f;
+                        isAutoRunning = false;
+                        lastDir = 0;
+                    }
+                }
+            }
+            else
+            {
+                runReleaseTimer = 0f;
+                if (dir == lastDir || lastDir == 0)
+                {
+                    runHoldTimer += Time.deltaTime;
+                    if (runHoldTimer >= runHoldSeconds) isAutoRunning = true;
+                }
+                else
+                {
+                    runHoldTimer = 0f;
+                    isAutoRunning = false;
+                }
+                lastDir = dir;
+            }
+
+            if (Mathf.Abs(inputX) < 0.01f && Mathf.Abs(rb.linearVelocity.x) < 0.01f)
+            {
+                // pode deixar o grace cuidar do reset ou zerar aqui se preferir
+                // runHoldTimer = 0f; isAutoRunning = false; lastDir = 0;
+            }
+        }
+        else
+        {
+            isAutoRunning = false;
+            runHoldTimer = 0f;
+            lastDir = 0;
+        }
+
+        // Buffer de pulo
         if (InputRouter.JumpTap())
             jumpBufferTimer = jumpBuffer;
         jumpBufferTimer -= Time.deltaTime;
@@ -166,11 +224,9 @@ public class PlayerMovement2D : MonoBehaviour
         // “corte de subida” quando solta o pulo
         HandleJumpForce();
         if (jumpTimeDebuffStopwatch.ElapsedTimeSec() < coyoteTime + 0.01f)
-        {
             return;
-        }
 
-        // Press do pulo neste frame (para lógica que usa bool)
+        // Press do pulo neste frame
         jumpPressed = InputRouter.JumpTap();
 
         HandleJumpBuffer();
@@ -178,11 +234,7 @@ public class PlayerMovement2D : MonoBehaviour
         HandleJump();
         jumpPressed = false;
 
-        // High Jump via pickup (se quiser usar Special para habilitar o high jump: descomente)
-        // if (hasHighJumpPower && InputRouter.SpecialTap())
-        //     queuedHighJump = true;
-
-        // Pedido de drop-through (↓/S) — agora pelo eixo Y do roteador
+        // Drop-through (↓)
         bool dropPressed = (inputY < -0.7f);
         if (dropPressed)
         {
@@ -192,7 +244,7 @@ public class PlayerMovement2D : MonoBehaviour
         if (dropThroughTimer > 0f)
             dropThroughTimer -= Time.deltaTime;
 
-        // Ladder: Up/Down controlam entrar/sair
+        // Ladder
         if (emLadderZone)
         {
             if (!isClimbing && Mathf.Abs(inputY) > 0.05f)
@@ -209,9 +261,7 @@ public class PlayerMovement2D : MonoBehaviour
     void FixedUpdate()
     {
         if (jumpTimeDebuffStopwatch.ElapsedTimeSec() < coyoteTime + 0.01f)
-        {
             return;
-        }
 
         // Coyote time
         if (isGrounded) coyoteTimer = coyoteTime;
@@ -242,16 +292,16 @@ public class PlayerMovement2D : MonoBehaviour
         }
         else rb.gravityScale = 1f;
 
-        // Movimento horizontal: usa AxisX do roteador
+        // Movimento horizontal
         float moveInput = inputX;
 
-        // (se ainda quiser Shift correr no desktop, pode manter — no mobile ignora)
+        // Shift ainda força corrida no desktop; auto-run tem prioridade
         bool runHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        float speed = runHeld ? runSpeed : walkSpeed;
+        float speed = (isAutoRunning || runHeld) ? runSpeed : walkSpeed;
 
         rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y);
 
-        // High jump simplificado
+        // High jump (se usar)
         if (queuedHighJump && isGrounded)
         {
             queuedHighJump = false;
@@ -259,11 +309,9 @@ public class PlayerMovement2D : MonoBehaviour
             if (animator) animator.SetTrigger(hHighJump);
         }
 
-        // Descer por OneWay: empurrãozinho se no chão
+        // Descer por OneWay
         if (dropThroughTimer > 0f && isGrounded)
-        {
             rb.position += Vector2.down * (groundCastDistance * 1.5f);
-        }
     }
 
     void LateUpdate()
@@ -315,9 +363,7 @@ public class PlayerMovement2D : MonoBehaviour
         int layer = collision.gameObject.layer;
         LayerMask allGroundLayers = groundMask | oneWayMask | bridgeMask;
         if ((allGroundLayers & (1 << layer)) != 0)
-        {
             isGrounded = true;
-        }
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -325,9 +371,7 @@ public class PlayerMovement2D : MonoBehaviour
         int layer = collision.gameObject.layer;
         LayerMask allGroundLayers = groundMask | oneWayMask | bridgeMask;
         if ((allGroundLayers & (1 << layer)) != 0)
-        {
             isGrounded = false;
-        }
     }
 
     // — Escada (Trigger) —
@@ -351,11 +395,9 @@ public class PlayerMovement2D : MonoBehaviour
         }
     }
 
-    // — Pulo: corta subida ao soltar (usa InputRouter indiretamente via jumpPressed) —
+    // — Pulo: corta subida ao soltar —
     private void HandleJumpForce()
     {
-        // Se NÃO está pressionando jump (no desktop: Space/Jump), corta subida
-        // No mobile o "segurar" não existe por padrão — sem problemas.
         if (!Input.GetButton("Jump") && !Input.GetKey(KeyCode.Space) && isJumping)
         {
             if (rb.linearVelocity.y > 0)
@@ -368,7 +410,6 @@ public class PlayerMovement2D : MonoBehaviour
     {
         if (isGrounded) isJumping = false;
 
-        // Raycast para validar pulo
         float rayDistance = distanceToGround + 0.1f;
         bool canJump = Physics2D.Raycast(transform.position, Vector2.down, rayDistance, groundMask);
 
