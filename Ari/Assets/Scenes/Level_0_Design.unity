@@ -3125,7 +3125,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 0
-  orthographic size: 4.6875
+  orthographic size: 7.453125
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -25059,7 +25059,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Para andar, use W,A,D ou as setas do lado, para correr segure Shift
+  m_text: Para andar, use as setas da esquerda
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -30245,7 +30245,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Aperte Space para pular
+  m_text: "Para pular, use o bot\xE3o com setas na direita"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -30481,7 +30481,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 37, y: 300}
+  m_AnchoredPosition: {x: 37.11, y: 299.79}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1495572170
@@ -30523,7 +30523,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Cuidado! Voc\xEA vai enfrentar seu primeiro inimigo, aperte o bot\xE3o
-    esquerdo do mouse para atirar"
+    de espada"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -30761,7 +30761,7 @@ MonoBehaviour:
   runSpeed: 4.5
   aceleracaoNoChao: 10
   aceleracaoNoAr: 1
-  forcaPulo: 7
+  forcaPulo: 15
   coyoteTime: 0.01
   jumpBuffer: 0.01
   gravidadeDescida: 2
@@ -31937,7 +31937,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 4.6875
+  orthographic size: 7.453125
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -32638,7 +32638,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Use W,S ou as setas para subir e descer a escada
+  m_text: Use as setas da esquerda para subir a escada
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -34723,7 +34723,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 55.2, y: 270.7}
+  m_AnchoredPosition: {x: 53.2, y: 270.77}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1949966079
@@ -34765,7 +34765,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Essa po\xE7\xE3o vai te\n dar um ataque extra, \npara usar aperte E\n"
+  m_text: "Essa po\xE7\xE3o vai te\n dar um ataque extra, \npara usar aperte o \nbot\xE3o
+    de explos\xE3o\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
